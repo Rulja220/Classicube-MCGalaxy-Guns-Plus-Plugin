@@ -6,7 +6,7 @@ Guns Plus is a MCGalaxy plugin that add new and better guns to Classicube and mo
 +Team Respawning  
 +Health  
 
-**To activate Gun Plus in your level put +gunsplus in the level MOTD**
+**To activate Gun Plus in your level put +gunsplus in the level MOTD**  
 To change your gun do /gunplus [gun name]  
 To change your team do /gunplus [team name]  
 more in /help gunplus  
