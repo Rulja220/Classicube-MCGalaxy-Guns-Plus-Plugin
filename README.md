@@ -7,6 +7,9 @@ Guns Plus is a MCGalaxy plugin that add new and better guns to Classicube and mo
 +Health  
 
 **To activate Gun Plus in your level put +gunsplus in the level MOTD**
+To change your gun do /gunplus [gun name]  
+To change your team do /gunplus [team name]  
+more in /help gunplus  
 
 You can also add your own guns
 Go to ```createBullet``` function and make a new ```else if``` branch with ```pl.Extras.GetString("AMMOTYPE") == [name of your gun]```
