@@ -19,13 +19,14 @@ Go to ```createBullet``` function and make a new ```else if``` branch with ```pl
 ```
 Example: ```else if (pl.Extras.GetString("AMMOTYPE") == "SUPERGUN") {```
 Now give it stats:  
-**pl.Extras["FIRERATE"]**: The firerate of the gun  
+**pl.Extras["FIRERATE"]**: The firerate of the weapon  
 **output.block**: The id of the block that will be shown as the bullet  
 **output.damage**: The damage of 1 bullet  
 **output.killMessage**: Message that will be shown when you kill someone (If the kill message is " /--- " in game it will look like ```Rulja1234 /--- xX_DeathSlayer_Xx```)  
 **output.xSpread**: What is the Horizontal spread of the bullets  
 **output.ySpread**: What is the vertical spread of the bullets  
-**output.numBullets: How many bullets does the gun shoot  
+**output.reach**: How many blocks can the bullet go before disappearing
+**output.numBullets: How many bullets does the weapon shoot  
 
 *Here is how it all should look like:*  
 
@@ -35,7 +36,8 @@ Now give it stats:
 &emsp;output.damage = 100;  
 &emsp;output.killMessage = "8=D ";  
 &emsp;output.xSpread = 0;  
-&emsp;output.ySpread = 0;  
+&emsp;output.ySpread = 0; 
+&emsp;output.reach = 10000; 
 &emsp;output.numBullets = 10;  
 }*  
 Now add same name that you put in argument for ```else if``` to ```gunNames```
