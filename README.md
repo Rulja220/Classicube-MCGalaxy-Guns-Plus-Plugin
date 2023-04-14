@@ -1,9 +1,10 @@
 # Classicube-MCGalaxy-Guns-Plus-Plugin
 Guns Plus is a MCGalaxy plugin that add new and better guns to Classicube and more
 
-+6 New guns  
++7 New weapons  
 +3 New Teams  
 +Team Respawning  
++2 Gamemodes
 +Health  
 
 **To activate Gun Plus in your level put +gunsplus in the level MOTD**  
