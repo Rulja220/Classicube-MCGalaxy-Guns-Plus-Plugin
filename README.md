@@ -3,20 +3,18 @@ Guns Plus is a MCGalaxy plugin that add new and better guns to Classicube and mo
 
 +7 New weapons  
 +Teams  
-+2 Gamemodes  
++4 Gamemodes  
 +Health  
 
 **To activate Gun Plus in your level put +gunsplus in the level MOTD**  
-To change your gun do /gunplus [gun name]  
-To change your team do /gunplus [team name]  
+To change your gun do /gunplus gun [gun name]  
+To change join game do /gunplus join
 more in /help gunplus  
 
 You can also add your own guns
-Go to ```createBullet``` function and make a new ```else if``` branch with ```pl.Extras.GetString("AMMOTYPE") == [name of your gun]```
-``` diff 
-- NAME OF YOUR GUN MUST BE IN UPPERCASE 
-```
-Example: ```else if (pl.Extras.GetString("AMMOTYPE") == "SUPERGUN") {```
+Add name of gun to gunNames
+Go to ```createBullet``` function and make a new ```else if``` branch with ```pl.Extras.GetString("AMMOTYPE") == [index in gunNames]```
+Example: ```else if (pl.Extras.GetString("AMMOTYPE") == gunNames[7]) {```
 Now give it stats:  
 **pl.Extras["FIRERATE"]**: The firerate of the weapon  
 **output.block**: The id of the block that will be shown as the bullet  
@@ -29,7 +27,7 @@ Now give it stats:
 
 *Here is how it all should look like:*  
 
-*else if (pl.Extras.GetString("AMMOTYPE") == "SUPERGUN") {  
+*else if (pl.Extras.GetString("AMMOTYPE") == gunNames[7]) {  
 &emsp;pl.Extras["FIRERATE"] = 100;  
 &emsp;output.block = Block.FromRaw((ushort)767);  
 &emsp;output.damage = 100;  
@@ -39,5 +37,4 @@ Now give it stats:
 &emsp;output.reach = 10000; 
 &emsp;output.numBullets = 10;  
 }*  
-Now add same name that you put in argument for ```else if``` to ```gunNames```
-and reload the plugin now your gun should be in game
+Reload the plugin now your gun should be in game
