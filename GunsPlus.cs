@@ -1,8 +1,9 @@
 using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
+using System.Text;
 using MCGalaxy;
 using MCGalaxy.Maths;
 using MCGalaxy.Tasks;
@@ -53,7 +54,7 @@ namespace GunsPlus {
 				if (pl.GetMotd().Contains("+gunsplus")) {
 					arg = arg.ToLower();
 					string[] args = arg.Split(" ");
-					string folder = Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "plugins/GunsPlus/"+pl.level.name+"&.txt");
+					string path = Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "plugins/GunsPlus/"+pl.level.name+".txt");
 					
 					//Changing the gun that you are holding
 					if (args.Length == 2 && args[0] == "gun" && GunsPlus.checkIn(args[1].ToUpper(), GunsPlus.gunNames) && pl.level.Extras.GetString("GAMEMODE") != "armsrace") {
@@ -63,7 +64,7 @@ namespace GunsPlus {
 					}
 					//Joining a game
 					else if (args.Length == 1 && args[0] == "join") {
-						string[] file = File.ReadAllText(folder).Split("\n");
+						string[] file = File.ReadAllLines(path, Encoding.UTF8);
 						pl.level.Extras["GAMEMODE"] = file[3];
 						if (pl.level.Extras.GetInt("BLUETEAM") > pl.level.Extras.GetInt("REDTEAM") && (pl.level.Extras.GetString("GAMEMODE") != "classic" && pl.level.Extras.GetString("GAMEMODE") != "deathmatch")) GunsPlus.game.teamChange(pl, "RED");
 						else if (pl.level.Extras.GetString("GAMEMODE") != "classic" && pl.level.Extras.GetString("GAMEMODE") != "deathmatch") GunsPlus.game.teamChange(pl, "BLUE");
@@ -81,7 +82,7 @@ namespace GunsPlus {
 							int line = 1;
 							if (args[1] == "red") line = 2;
 							else if (args[1] == "gray") line = 3;
-							lineChanger(args[2]+" "+args[3]+" "+args[4] ,folder ,line);
+							changeLine(args[2]+" "+args[3]+" "+args[4] ,path ,line);
 							pl.Message("&aSucessfully changed the spawn of team "+args[1]);
 						}
 						else {pl.Message("&cSorry, but that is an invalid spot for a team spawn!");}
@@ -96,13 +97,13 @@ namespace GunsPlus {
 						pl.level.Extras["BLUETEAM"] = 0;
 						pl.level.Extras["REDTEAM"] = 0;
 						pl.level.Extras["GRAYTEAM"] = 0;
-						lineChanger(args[1] ,folder ,4);
+						changeLine(args[1] ,path ,4);
 						pl.level.Extras["GAMEMODE"] = args[1];
 						pl.level.Message("&aSucessfully changed the gamemode to "+args[1]);
 					}
 					//Starting the game
 					else if (args.Length == 1 && args[0] == "start" && (LevelInfo.IsRealmOwner(pl.truename, pl.level.name) || pl.Rank >= LevelPermission.Admin)) {
-						string[] file = File.ReadAllText(folder).Split("\n");
+						string[] file = File.ReadAllLines(path, Encoding.UTF8);
 						if (file[0] != "NOT SET" && file[1] != "NOT SET" && file[2] != "NOT SET") {
 							pl.level.Extras["BLUESPAWN"] = file[0];
 							pl.level.Extras["REDSPAWN"] = file[1];
@@ -122,8 +123,13 @@ namespace GunsPlus {
 					}
 					//Ending the game
 					else if (args.Length == 1 && args[0] == "end" && (LevelInfo.IsRealmOwner(pl.truename, pl.level.name) || pl.Rank >= LevelPermission.Admin)) {
-						if (pl.level.Extras.GetString("RUNNING") == "true") {GunsPlus.endGame(pl, "No one");}
-						else {pl.Message("&cThere are no running games on this map!");}
+						if (pl.level.Extras.GetString("RUNNING") == "true") {
+							GunsPlus.endGame(pl, "No one");
+							pl.level.Extras["BLUETEAM"] = 0;
+							pl.level.Extras["REDTEAM"] = 0;
+							pl.level.Extras["GRAYTEAM"] = 0;
+						}
+						else pl.Message("&cThere are no running games on this map!");
 					}
 					//Error if the command is wrong
 					else {pl.Message("%cSorry that is invalid input or you can't do that now! Please do /help gunsplus");}
@@ -134,9 +140,9 @@ namespace GunsPlus {
 
 			public override void Help(Player p) {
 				p.Message("%T/gunsplus join &e- Join a game of Gun Plus");
-				p.Message("%T/gunsplus gamemode <gamemode> (Staff or Level Owner only)");
+				p.Message("%T/gunsplus gamemode <gamemode> &e- Change the gamemode (Staff or Level Owner only)");
 				p.Message("&eGamemodes: &fclassic/teamdeathmatch/deathmatch/armsrace");
-				p.Message("%T/gunsplus spawn <team> <x y z> (Staff or Level Owner only)");
+				p.Message("%T/gunsplus spawn <team> <x y z> &e- Change spawn of a team (Staff or Level Owner only)");
 				p.Message("&eTeams: &fBlue/Red/Gray");
 				p.Message("%T/gunsplus start &e- Start the game (Staff or Level Owner only)");							
 				p.Message("%T/gunsplus gun <gun>");
@@ -152,7 +158,7 @@ namespace GunsPlus {
 			if ((cmd == "Overseer" && args.StartsWith("map motd")) || (cmd == "map" && args.StartsWith("motd")) && args.Contains(" +gunsplus")) {
 				string folder = Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "plugins/GunsPlus");
 				if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-				string file = Path.Combine(folder, pl.level.name+"&.txt");
+				string file = Path.Combine(folder, pl.level.name+".txt");
 				if (!File.Exists(file)) {
 					FileStream fs = File.Create(file);
 					string[] write = {"NOT SET", "NOT SET", "NOT SET", "classic"};
@@ -184,7 +190,7 @@ namespace GunsPlus {
 			pl.Extras["FIRERATE"] = 1;
 			game.teamChange(pl, "SPEC");
 			if (pl.level.Extras.GetString("RUNNING") == null) {
-				string[] file = File.ReadAllText(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "plugins/GunsPlus/"+pl.level.name+"&.txt")).Split("\n");
+				string[] file = File.ReadAllLines(Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "plugins/GunsPlus/"+pl.level.name+".txt"), Encoding.UTF8);
 				pl.level.Extras["RUNNING"] = "false";
 				pl.level.Extras["GAMEMODE"] = file[3];
 				pl.level.Extras["BLUETEAM"] = 0;
@@ -209,17 +215,17 @@ namespace GunsPlus {
 			public static GunsPlus GunsPlus = new GunsPlus();
 			
 			public static void joinGame (Player pl) {
-				if (pl.level.Extras.GetString("RUNNING") == "false") {pl.Extras["TEAM"] = pl.Extras.GetString("PICKEDTEAM");}
-				Command.Find("tp").Use(pl, pl.level.Extras.GetString(pl.Extras.GetString("TEAM")+"SPAWN"));
 				if (pl.level.Extras.GetString("GAMEMODE") == "classic") {joinClassic(pl);}
 				else if (pl.level.Extras.GetString("GAMEMODE") == "teamdeathmatch") {joinTeamDeathMatch(pl);}
 				else if (pl.level.Extras.GetString("GAMEMODE") == "deathmatch") {joinDeathMatch(pl);}
 				else if (pl.level.Extras.GetString("GAMEMODE") == "armsrace") {joinArmsRace(pl);}
+				GunsPlus.showHP(pl);
+				Command.Find("tp").Use(pl, pl.level.Extras.GetString(pl.Extras.GetString("TEAM")+"SPAWN"));
 				Cooldown.StartCooldown(pl.truename+"inv", 10000);
 			}
 			
 			public static void leaveGame (Player pl, Level level) {
-				Command.Find("model").Use(pl, "humanoid");
+				Command.Find("model").Use(pl, pl.truename+" humanoid");
 				pl.Extras["KILLS"] = 0;
 				pl.Extras["DEATHS"] = 0;
 				pl.Extras["KILLSTREAK"] = 0;
@@ -272,9 +278,11 @@ namespace GunsPlus {
 			Player[] players = PlayerInfo.Online.Items;
 			foreach (Player pls in players) {
 				if (pl.level != pls.level || pls.Extras.GetString("PICKEDTEAM") == "SPEC" || pls.Extras.GetString("PICKEDTEAM") == "None") continue;
+				pls.Extras["TEAM"] = pls.Extras.GetString("PICKEDTEAM");
 				game.joinGame(pls);
 				pls.SendCpeMessage(CpeMessageType.Announcement,"%aThe game has started");
 			}
+			
 		}
 		
 		void endGame(Player pl, string winner) {
@@ -395,6 +403,11 @@ namespace GunsPlus {
 			pl.Extras["HEALTH"] = pl.Extras.GetInt("HEALTH") - args.bulletargs.damage;
 			pl.SendCpeMessage(CpeMessageType.BottomRight2, "You took "+args.bulletargs.damage+" damage");
 			if (pl.Extras.GetInt("HEALTH") < 1) {die(args, pl);}
+			showHP(pl);
+			args.hit = true;
+        }
+		
+		void showHP(Player pl) {
 			string color = "&0";
 			if (pl.Extras.GetInt("HEALTH") > 75) {color = "&4";}
 			else if (75 >= pl.Extras.GetInt("HEALTH") && pl.Extras.GetInt("HEALTH") > 50) {color = "&4";}
@@ -402,8 +415,7 @@ namespace GunsPlus {
 			else if (25 >= pl.Extras.GetInt("HEALTH") && pl.Extras.GetInt("HEALTH") > 10) {color = "&7";}
 			else if (10 >= pl.Extras.GetInt("HEALTH") && pl.Extras.GetInt("HEALTH") > 0) {color = "&8";}
 			pl.SendCpeMessage(CpeMessageType.BottomRight1, ""+color+""+pl.Extras.GetInt("HEALTH")+" ♥");
-			args.hit = true;
-        }
+		}
 
 		static Player PlayerAt(Player pls, Vec3U16 pos, bool skipSelf) {
             Player[] players = PlayerInfo.Online.Items;
@@ -458,6 +470,7 @@ namespace GunsPlus {
 			pl.Extras["KILLSTREAK"] = 0;
 			Cooldown.StartCooldown(pl.truename+"inv", 5000);
 			pl.Extras["HEALTH"] = 100;
+			showHP(pl);
 		}
 		
         bool TickMove(AmmunitionData args) {
@@ -529,7 +542,7 @@ namespace GunsPlus {
 			return false;
 		}
 		
-		static void lineChanger(string newText, string fileName, int line_to_edit) {
+		static void changeLine(string newText, string fileName, int line_to_edit) {
 			 string[] arrLine = File.ReadAllLines(fileName);
 			 arrLine[line_to_edit - 1] = newText;
 			 File.WriteAllLines(fileName, arrLine);
